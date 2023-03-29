@@ -1,8 +1,10 @@
 package utils;
 
 import java.util.List;
+import java.util.Map;
 
 public interface SortedResultsList{
-    List get(int nElem);
+    List<Result> getResults();
+    Map<Interval, Integer> getDistribution();
     void add(Result elem);
 }

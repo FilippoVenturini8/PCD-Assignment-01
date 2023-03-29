@@ -1,6 +1,7 @@
 package model;
 
 import utils.Result;
+import utils.SetupInfo;
 import utils.SortedResultsList;
 import utils.SynchronizedQueue;
 
@@ -14,4 +15,6 @@ public interface Model {
     void addObserver(ModelObserver observer);
 
     void notifyObservers();
+
+    SetupInfo getSetupInfo();
 }

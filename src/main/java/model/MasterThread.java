@@ -12,12 +12,10 @@ import java.util.stream.Stream;
 
 public class MasterThread extends Thread{
     private final Controller controller;
-    private final SetupInfo setupInfo;
     private final int nWorkers;
 
-    public MasterThread(Controller controller, SetupInfo setupInfo, int nWorkers) {
+    public MasterThread(Controller controller, int nWorkers) {
         this.controller = controller;
-        this.setupInfo = setupInfo;
         this.nWorkers = nWorkers;
     }
 
@@ -41,9 +39,8 @@ public class MasterThread extends Thread{
     }
 
     private void searchFiles(){
-        try (Stream<Path> walkStream = Files.walk(Paths.get(this.setupInfo.startDir()))) {
+        try (Stream<Path> walkStream = Files.walk(Paths.get(this.controller.getSetupInfo().startDir()))) {
             walkStream.filter(p -> p.toFile().isFile() && p.toString().endsWith(".java"))
-                    .limit(this.setupInfo.nFiles())
                     .map(Path::toString)
                     .forEach(p -> this.controller.getFiles().add(p));
         } catch (IOException e) {
