@@ -1,15 +1,16 @@
-package model.utils;
+package utils;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class SynchronizedQueueImpl<T> implements SynchronizedQueue<T> {
 
     private final List<T> list = new LinkedList<>();
-    private Lock mutex;
-    private Condition notEmpty;
+    private final Lock mutex = new ReentrantLock();
+    private final Condition notEmpty = mutex.newCondition();
 
     @Override
     public void add(T elem) {

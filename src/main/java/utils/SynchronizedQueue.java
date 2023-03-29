@@ -1,4 +1,4 @@
-package model.utils;
+package utils;
 
 public interface SynchronizedQueue <T>{
     void add(T elem);
