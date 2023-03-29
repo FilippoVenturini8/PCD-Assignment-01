@@ -12,6 +12,7 @@ public class Assignment1 {
         final View view = new ConsoleView();
         final Controller controller = new ControllerImpl(model, view);
 
+        model.addObserver(view);
         final SetupInfo setupInfo = new SetupInfo("D:\\Progetti\\Hangman_Online", 10000, 1, 1);
 
         controller.start(setupInfo, 2);

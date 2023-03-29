@@ -11,4 +11,6 @@ public interface Controller {
     SynchronizedQueue<String> getFiles();
 
     SortedResultsList getSortedResults();
+
+    void notifyObservers();
 }

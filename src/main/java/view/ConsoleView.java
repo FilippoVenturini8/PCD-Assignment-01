@@ -9,4 +9,9 @@ public class ConsoleView implements View{
     public void setController(Controller controller) {
         this.controller = controller;
     }
+
+    @Override
+    public void resultsUpdated() {
+        System.out.println(this.controller.getSortedResults().get(10));
+    }
 }

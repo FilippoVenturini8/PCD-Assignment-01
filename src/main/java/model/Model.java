@@ -10,4 +10,8 @@ public interface Model {
     SynchronizedQueue<Result> getResults();
 
     SortedResultsList getSortedResults();
+
+    void addObserver(ModelObserver observer);
+
+    void notifyObservers();
 }

@@ -33,7 +33,7 @@ public class MasterThread extends Thread{
             try {
                 final Result result = this.controller.getResults().blockingRemove();
                 this.controller.getSortedResults().add(result);
-                System.out.println(this.controller.getSortedResults().get(10));
+                this.controller.notifyObservers();
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }

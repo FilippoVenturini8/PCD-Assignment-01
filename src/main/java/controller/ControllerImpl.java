@@ -36,4 +36,9 @@ public class ControllerImpl implements Controller{
     public SortedResultsList getSortedResults(){
         return this.model.getSortedResults();
     }
+
+    @Override
+    public void notifyObservers(){
+        this.model.notifyObservers();
+    }
 }
