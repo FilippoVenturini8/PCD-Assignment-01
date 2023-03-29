@@ -1,6 +1,7 @@
 package model;
 
 import controller.Controller;
+import utils.Result;
 import utils.SetupInfo;
 
 import java.io.IOException;
@@ -23,6 +24,20 @@ public class MasterThread extends Thread{
     @Override
     public void run() {
         this.searchFiles();
+
+        for(int i = 0; i < this.nWorkers; i++){
+            new WorkerThread(this.controller.getFiles(), this.controller.getResults()).start();
+        }
+
+        while (true){
+            try {
+                final Result result = this.controller.getResults().blockingRemove();
+                this.controller.getSortedResults().add(result);
+                System.out.println(this.controller.getSortedResults().get(10));
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     private void searchFiles(){

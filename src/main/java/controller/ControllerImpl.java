@@ -4,6 +4,7 @@ import model.MasterThread;
 import model.Model;
 import utils.Result;
 import utils.SetupInfo;
+import utils.SortedResultsList;
 import utils.SynchronizedQueue;
 import view.View;
 
@@ -30,5 +31,9 @@ public class ControllerImpl implements Controller{
     @Override
     public SynchronizedQueue<String> getFiles() {
         return this.model.getFiles();
+    }
+    @Override
+    public SortedResultsList getSortedResults(){
+        return this.model.getSortedResults();
     }
 }

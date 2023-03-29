@@ -1,9 +1,13 @@
 package utils;
 
+import java.util.Optional;
+
 public interface SynchronizedQueue <T>{
     void add(T elem);
 
-    T remove() throws InterruptedException;
+    T blockingRemove() throws InterruptedException;
+
+    Optional<T> remove();
 
     boolean isEmpty();
 }

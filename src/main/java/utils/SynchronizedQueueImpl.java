@@ -2,6 +2,7 @@ package utils;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -24,13 +25,26 @@ public class SynchronizedQueueImpl<T> implements SynchronizedQueue<T> {
     }
 
     @Override
-    public T remove() throws InterruptedException{
+    public T blockingRemove() throws InterruptedException{
         try{
             mutex.lock();
-            if(this.isEmpty()){
+            if(this.list.isEmpty()){
                 notEmpty.await();
             }
             return this.list.remove(0);
+        } finally {
+            mutex.unlock();
+        }
+    }
+
+    @Override
+    public Optional<T> remove(){
+        try{
+            mutex.lock();
+            if(this.list.isEmpty()){
+                return Optional.empty();
+            }
+            return Optional.of(this.list.remove(0));
         } finally {
             mutex.unlock();
         }
@@ -41,6 +55,18 @@ public class SynchronizedQueueImpl<T> implements SynchronizedQueue<T> {
         try{
             mutex.lock();
             return this.list.isEmpty();
+        }finally {
+            mutex.unlock();
+        }
+    }
+
+    @Override
+    public String toString() {
+        try{
+            mutex.lock();
+            return "SynchronizedQueueImpl{" +
+                    "list=" + list +
+                    '}';
         }finally {
             mutex.unlock();
         }
