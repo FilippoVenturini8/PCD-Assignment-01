@@ -10,6 +10,7 @@ import javax.swing.*;
 import javax.xml.stream.FactoryConfigurationError;
 import java.awt.*;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static model.MasterThread.N_WORKERS;
 
@@ -90,6 +91,7 @@ public class GuiView implements View{
         final JPanel resultsPanel = new JPanel();
 
         this.rankingList.setSize(100, 50);
+        this.rankingList.setAutoscrolls(true);
         this.distributionList.setSize(100, 50);
 
         inputPanel.add(lblDirectory);
@@ -117,19 +119,21 @@ public class GuiView implements View{
 
     @Override
     public void resultsUpdated() {
+        DefaultListModel<Result> rankingModel = new DefaultListModel<>();
+        rankingModel.addAll(this.controller.getResults().getRanking());
+        rankingList.setModel(rankingModel);
 
+        DefaultListModel<String> distributionModel = new DefaultListModel<>();
+        distributionModel.addAll(this.controller.getResults().getDistribution().entrySet().stream()
+                .map(e -> e.getKey() + " : " + e.getValue()).
+                collect(Collectors.toList()));
+        distributionList.setModel(distributionModel);
     }
 
     @Override
     public void computationEnded() {
-        System.out.println("Files ranking:");
-        for(Result result : this.controller.getResults().getRanking()){
-            System.out.println(result.filePath() + " has: " + result.lines() + " lines.");
-        }
-        System.out.println("Files distribution:");
-        for(Map.Entry<Interval, Integer> entry : this.controller.getResults().getDistribution().entrySet()){
-            System.out.println(entry.getKey() + " : " + entry.getValue());
-        }
+        this.btnStart.setEnabled(true);
+        this.btnStop.setEnabled(false);
     }
 
     @Override
