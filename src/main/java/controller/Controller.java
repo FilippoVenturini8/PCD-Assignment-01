@@ -1,17 +1,14 @@
 package controller;
 
+import model.ModelObserver;
 import utils.*;
-
-import java.util.Map;
 
 public interface Controller {
     void start(SetupInfo setupInfo, int nWorkers);
-    SynchronizedQueue<Result> getResults();
-    SynchronizedQueue<String> getFiles();
 
-    SortedResultsList getSortedResults();
+    Results getResults();
 
-    void notifyObservers();
+    void notifyObservers(ModelObserver.Event event);
 
     SetupInfo getSetupInfo();
 }

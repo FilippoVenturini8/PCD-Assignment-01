@@ -2,7 +2,8 @@ package model;
 
 import controller.Controller;
 import utils.Result;
-import utils.SetupInfo;
+import utils.SynchronizedQueue;
+import utils.SynchronizedQueueImpl;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -13,6 +14,8 @@ import java.util.stream.Stream;
 public class MasterThread extends Thread{
     private final Controller controller;
     private final int nWorkers;
+    private final SynchronizedQueue<String> files = new SynchronizedQueueImpl<>();
+    private final SynchronizedQueue<Result> results = new SynchronizedQueueImpl<>();
 
     public MasterThread(Controller controller, int nWorkers) {
         this.controller = controller;
@@ -24,25 +27,27 @@ public class MasterThread extends Thread{
         this.searchFiles();
 
         for(int i = 0; i < this.nWorkers; i++){
-            new WorkerThread(this.controller.getFiles(), this.controller.getResults()).start();
+            new WorkerThread(this.files, this.results).start();
         }
 
-        while (true){
+        int nOfFiles = this.files.size();
+        for (int i = 0; i < nOfFiles; i++){
             try {
-                final Result result = this.controller.getResults().blockingRemove();
-                this.controller.getSortedResults().add(result);
-                this.controller.notifyObservers();
+                final Result result = this.results.blockingRemove();
+                this.controller.getResults().add(result);
+                this.controller.notifyObservers(ModelObserver.Event.RESULT_UPDATED);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
         }
+        this.controller.notifyObservers(ModelObserver.Event.COMPUTATION_ENDED);
     }
 
     private void searchFiles(){
         try (Stream<Path> walkStream = Files.walk(Paths.get(this.controller.getSetupInfo().startDir()))) {
             walkStream.filter(p -> p.toFile().isFile() && p.toString().endsWith(".java"))
                     .map(Path::toString)
-                    .forEach(p -> this.controller.getFiles().add(p));
+                    .forEach(this.files::add);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

@@ -2,10 +2,9 @@ package controller;
 
 import model.MasterThread;
 import model.Model;
+import model.ModelObserver;
 import utils.*;
 import view.View;
-
-import java.util.Map;
 
 public class ControllerImpl implements Controller{
     private final Model model;
@@ -23,22 +22,13 @@ public class ControllerImpl implements Controller{
     }
 
     @Override
-    public SynchronizedQueue<Result> getResults() {
+    public Results getResults(){
         return this.model.getResults();
     }
 
     @Override
-    public SynchronizedQueue<String> getFiles() {
-        return this.model.getFiles();
-    }
-    @Override
-    public SortedResultsList getSortedResults(){
-        return this.model.getSortedResults();
-    }
-
-    @Override
-    public void notifyObservers(){
-        this.model.notifyObservers();
+    public void notifyObservers(ModelObserver.Event event){
+        this.model.notifyObservers(event);
     }
 
     @Override

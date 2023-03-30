@@ -8,7 +8,7 @@ import view.View;
 
 public class Assignment1 {
     public static void main(String[] args){
-        final SetupInfo setupInfo = new SetupInfo("D:\\Progetti\\Hangman_Online", 10000, 1, 1);
+        final SetupInfo setupInfo = new SetupInfo("D:\\Progetti\\Hangman_Online", 10000, 10, 100);
 
         final Model model = new ModelImpl(setupInfo);
         final View view = new ConsoleView();

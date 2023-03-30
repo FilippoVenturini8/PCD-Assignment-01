@@ -1,20 +1,15 @@
 package model;
 
-import utils.Result;
 import utils.SetupInfo;
-import utils.SortedResultsList;
-import utils.SynchronizedQueue;
+import utils.Results;
 
 public interface Model {
-    SynchronizedQueue<String> getFiles();
 
-    SynchronizedQueue<Result> getResults();
-
-    SortedResultsList getSortedResults();
+    Results getResults();
 
     void addObserver(ModelObserver observer);
 
-    void notifyObservers();
+    void notifyObservers(ModelObserver.Event event);
 
     SetupInfo getSetupInfo();
 }

@@ -10,4 +10,6 @@ public interface SynchronizedQueue <T>{
     Optional<T> remove();
 
     boolean isEmpty();
+
+    int size();
 }

@@ -61,6 +61,16 @@ public class SynchronizedQueueImpl<T> implements SynchronizedQueue<T> {
     }
 
     @Override
+    public int size(){
+        try{
+            mutex.lock();
+            return this.list.size();
+        }finally {
+            mutex.unlock();
+        }
+    }
+
+    @Override
     public String toString() {
         try{
             mutex.lock();
