@@ -1,6 +1,6 @@
 package utils;
 
-public record Interval(int min, int max) {
+public record Interval(int min, int max) implements Comparable<Interval> {
     public boolean contains(int value){
         return value >= min && value < max;
     }
@@ -10,5 +10,10 @@ public record Interval(int min, int max) {
         return "[" + min +
                 ", " + max +
                 ']';
+    }
+
+    @Override
+    public int compareTo(Interval o) {
+        return Integer.compare(min, o.min);
     }
 }

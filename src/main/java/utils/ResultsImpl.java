@@ -9,7 +9,7 @@ public class ResultsImpl implements Results {
     private final int nResults;
     private final Set<Result> ranking = new TreeSet<>();
     private final Lock mutex = new ReentrantLock();
-    private final Map<Interval, Integer> distribution = new HashMap<>();
+    private final Map<Interval, Integer> distribution = new TreeMap<>();
 
     public ResultsImpl(int nResults, int nIntervals, int lastInterval){
         this.nResults = nResults;
