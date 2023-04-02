@@ -1,5 +1,6 @@
 package model;
 
+import utils.Flag;
 import utils.SetupInfo;
 import utils.Results;
 
@@ -14,4 +15,6 @@ public interface Model {
     void notifyObservers(ModelObserver.Event event);
 
     SetupInfo getSetupInfo();
+
+    Flag getStopExecutionFlag();
 }

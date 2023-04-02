@@ -1,5 +1,6 @@
 package model;
 
+import utils.Flag;
 import utils.Result;
 import utils.SynchronizedQueue;
 
@@ -11,15 +12,17 @@ import java.util.Optional;
 public class WorkerThread extends Thread{
     private final SynchronizedQueue<String> files;
     private final SynchronizedQueue<Result> results;
+    private Flag stopExecutionFlag;
 
-    public WorkerThread(SynchronizedQueue<String> files, SynchronizedQueue<Result> results){
+    public WorkerThread(SynchronizedQueue<String> files, SynchronizedQueue<Result> results, Flag stopExecutionFlag){
         this.files = files;
         this.results = results;
+        this.stopExecutionFlag = stopExecutionFlag;
     }
 
     @Override
     public void run() {
-        while(true){
+        while(!this.stopExecutionFlag.get()){
             final Optional<String> pathToProcess = files.remove();
             if(pathToProcess.isEmpty()){
                 break;

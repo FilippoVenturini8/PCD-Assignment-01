@@ -74,18 +74,28 @@ public class GuiView implements View{
                 return;
             }
 
-            this.controller.start(new SetupInfo(
-                    txtDirectory.getText(),
-                    Integer.parseInt(txtNFiles.getText()),
-                    Integer.parseInt(txtIntervals.getText()),
-                    Integer.parseInt(txtLastInterval.getText())), N_WORKERS);
-
             btnStart.setEnabled(false);
             btnStop.setEnabled(true);
+
+            this.rankingList.setModel(new DefaultListModel<>());
+            this.distributionList.setModel(new DefaultListModel<>());
+
+            this.controller.processEvent(() -> {
+                this.controller.start(new SetupInfo(
+                        txtDirectory.getText(),
+                        Integer.parseInt(txtNFiles.getText()),
+                        Integer.parseInt(txtIntervals.getText()),
+                        Integer.parseInt(txtLastInterval.getText())), N_WORKERS);
+            });
         });
 
         btnStop.addActionListener(e -> {
+            this.btnStart.setEnabled(true);
+            this.btnStop.setEnabled(true);
 
+            this.controller.processEvent(() -> {
+                this.controller.stopExecution();
+            });
         });
 
         final JPanel resultsPanel = new JPanel();
@@ -121,13 +131,15 @@ public class GuiView implements View{
     public void resultsUpdated() {
         DefaultListModel<Result> rankingModel = new DefaultListModel<>();
         rankingModel.addAll(this.controller.getResults().getRanking());
-        rankingList.setModel(rankingModel);
+
+        SwingUtilities.invokeLater(() -> rankingList.setModel(rankingModel));
 
         DefaultListModel<String> distributionModel = new DefaultListModel<>();
         distributionModel.addAll(this.controller.getResults().getDistribution().entrySet().stream()
                 .map(e -> e.getKey() + " : " + e.getValue()).
                 collect(Collectors.toList()));
-        distributionList.setModel(distributionModel);
+
+        SwingUtilities.invokeLater(() -> distributionList.setModel(distributionModel));
     }
 
     @Override

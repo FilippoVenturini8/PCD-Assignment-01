@@ -19,6 +19,7 @@ public class ControllerImpl implements Controller{
     @Override
     public void start(SetupInfo setupInfo, int nWorkers) {
         this.model.init(setupInfo);
+        this.model.getStopExecutionFlag().set(false);
         new MasterThread(this, nWorkers).start();
     }
 
@@ -35,5 +36,20 @@ public class ControllerImpl implements Controller{
     @Override
     public SetupInfo getSetupInfo(){
         return this.model.getSetupInfo();
+    }
+
+    @Override
+    public void stopExecution() {
+        this.model.getStopExecutionFlag().set(false);
+    }
+
+    @Override
+    public Flag getStopExecutionFlag(){
+        return this.model.getStopExecutionFlag();
+    }
+
+    @Override
+    public void processEvent(Runnable runnable){
+        new Thread(runnable).start();
     }
 }

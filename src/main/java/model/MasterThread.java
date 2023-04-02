@@ -1,6 +1,7 @@
 package model;
 
 import controller.Controller;
+import utils.Flag;
 import utils.Result;
 import utils.SynchronizedQueue;
 import utils.SynchronizedQueueImpl;
@@ -26,13 +27,14 @@ public class MasterThread extends Thread{
     @Override
     public void run() {
         this.searchFiles();
+        final Flag stopExecutionFlag = this.controller.getStopExecutionFlag();
 
         for(int i = 0; i < this.nWorkers; i++){
-            new WorkerThread(this.files, this.results).start();
+            new WorkerThread(this.files, this.results, stopExecutionFlag).start();
         }
 
         int nOfFiles = this.files.size();
-        for (int i = 0; i < nOfFiles; i++){
+        for (int i = 0; i < nOfFiles && !stopExecutionFlag.get(); i++){
             try {
                 final Result result = this.results.blockingRemove();
                 this.controller.getResults().add(result);
