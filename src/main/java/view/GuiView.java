@@ -7,9 +7,7 @@ import utils.SetupInfo;
 import utils.Strings;
 
 import javax.swing.*;
-import javax.xml.stream.FactoryConfigurationError;
 import java.awt.*;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import static model.MasterThread.N_WORKERS;
