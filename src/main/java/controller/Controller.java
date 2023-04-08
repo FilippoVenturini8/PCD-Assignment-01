@@ -17,4 +17,6 @@ public interface Controller {
     Flag getStopExecutionFlag();
 
     void processEvent(Runnable runnable);
+
+    long getElapsedTime();
 }

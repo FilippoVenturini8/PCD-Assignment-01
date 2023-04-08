@@ -20,6 +20,7 @@ public class ControllerImpl implements Controller{
     public void start(SetupInfo setupInfo, int nWorkers) {
         this.model.init(setupInfo);
         this.model.getStopExecutionFlag().set(false);
+        this.model.setStartTime(System.currentTimeMillis());
         new MasterThread(this, nWorkers).start();
     }
 
@@ -51,5 +52,10 @@ public class ControllerImpl implements Controller{
     @Override
     public void processEvent(Runnable runnable){
         new Thread(runnable).start();
+    }
+
+    @Override
+    public long getElapsedTime(){
+        return System.currentTimeMillis() - this.model.getStartTime();
     }
 }

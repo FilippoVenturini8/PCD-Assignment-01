@@ -99,7 +99,6 @@ public class GuiView implements View{
         final JPanel resultsPanel = new JPanel();
 
         this.rankingList.setSize(100, 50);
-        this.rankingList.setAutoscrolls(true);
         this.distributionList.setSize(100, 50);
 
         inputPanel.add(lblDirectory);
@@ -114,8 +113,8 @@ public class GuiView implements View{
         controlPanel.add(btnStart);
         controlPanel.add(btnStop);
 
-        resultsPanel.add(rankingList);
-        resultsPanel.add(distributionList);
+        resultsPanel.add(new JScrollPane(rankingList));
+        resultsPanel.add(new JScrollPane(distributionList));
 
         mainPanel.add(inputPanel);
         mainPanel.add(controlPanel);

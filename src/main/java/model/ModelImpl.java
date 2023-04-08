@@ -10,6 +10,7 @@ public class ModelImpl implements Model{
     private final List<ModelObserver> observers = new LinkedList<>();
     private SetupInfo setupInfo;
     private final Flag stopExecutionFlag = new Flag();
+    private long startTime;
 
     @Override
     public void init(SetupInfo setupInfo){
@@ -45,6 +46,16 @@ public class ModelImpl implements Model{
     @Override
     public Flag getStopExecutionFlag(){
         return this.stopExecutionFlag;
+    }
+
+    @Override
+    public void setStartTime(long startTime) {
+        this.startTime = startTime;
+    }
+
+    @Override
+    public long getStartTime() {
+        return this.startTime;
     }
 
 }

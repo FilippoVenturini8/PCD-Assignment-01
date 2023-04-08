@@ -17,4 +17,7 @@ public interface Model {
     SetupInfo getSetupInfo();
 
     Flag getStopExecutionFlag();
+
+    void setStartTime(long startTime);
+    long getStartTime();
 }

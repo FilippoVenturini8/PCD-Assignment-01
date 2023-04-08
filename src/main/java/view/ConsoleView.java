@@ -28,5 +28,7 @@ public class ConsoleView implements View{
         for(Map.Entry<Interval, Integer> entry : this.controller.getResults().getDistribution().entrySet()){
             System.out.println(entry.getKey() + " : " + entry.getValue());
         }
+
+        System.out.println("Execution time: " + this.controller.getElapsedTime() + " milliseconds");
     }
 }
