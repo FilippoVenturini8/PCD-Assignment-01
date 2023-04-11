@@ -13,7 +13,7 @@ import java.nio.file.Paths;
 import java.util.stream.Stream;
 
 public class MasterThread extends Thread{
-    public static final int N_WORKERS = 7;
+    public static final int N_WORKERS = Runtime.getRuntime().availableProcessors();
     private final Controller controller;
     private final int nWorkers;
     private final SynchronizedQueue<String> files = new SynchronizedQueueImpl<>();
