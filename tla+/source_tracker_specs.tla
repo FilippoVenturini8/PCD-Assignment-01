@@ -13,9 +13,16 @@ NF == NumFiles
 
 variables
     fileSynchronizedQueue = <<>>;
+    resultsSynchronizedQueue = <<>>;
     foundFiles = 0;
     availableFiles = 0;
+    availableResult = 0;
     allFilesInQueue = 0;
+    
+define
+    NumberOfResults == Len(resultsSynchronizedQueue) <= NF
+    NumberOfFiles == Len(fileSynchronizedQueue) <= NF
+end define;
 
 macro wait(s) begin
   await s > 0;
@@ -29,7 +36,9 @@ end macro;
 fair process master \in 0..0
 variables 
     file = "";
+    result = "";
     i = 0;
+    j = 0;
 begin Search:
     while foundFiles < NF do
         search:
@@ -43,10 +52,23 @@ begin Search:
                 signal(allFilesInQueue);
                 i := i + 1;
         end while;
+    cumputeResults:
+        while j < NF do
+            waitResult:
+                wait(availableResult);
+            getResult:
+                result := Head(resultsSynchronizedQueue);
+                resultsSynchronizedQueue := Tail(resultsSynchronizedQueue);
+            exposeResult:
+                print result;
+                j := j + 1;
+        end while;
 end process;
 
 fair process worker \in 1..NW
-variable file = "none";
+variables 
+    file = "none";
+    result = "none";
 begin Read:
     wait(allFilesInQueue);
     take:
@@ -55,32 +77,48 @@ begin Read:
                 file := Head(fileSynchronizedQueue);
                 fileSynchronizedQueue := Tail(fileSynchronizedQueue);
             count:
-                print file;
+                result := "result";
+            putResult:
+                resultsSynchronizedQueue := Append(resultsSynchronizedQueue, result);
+                signal(availableResult);
         end while;
 end process;
 
 
 end algorithm;*)
-\* BEGIN TRANSLATION (chksum(pcal) = "73c89f9b" /\ chksum(tla) = "26f05d")
-\* Process variable file of process master at line 31 col 5 changed to file_
-VARIABLES fileSynchronizedQueue, foundFiles, availableFiles, allFilesInQueue, 
-          pc, file_, i, file
+\* BEGIN TRANSLATION (chksum(pcal) = "54269c38" /\ chksum(tla) = "1b9f6456")
+\* Process variable file of process master at line 38 col 5 changed to file_
+\* Process variable result of process master at line 39 col 5 changed to result_
+VARIABLES fileSynchronizedQueue, resultsSynchronizedQueue, foundFiles, 
+          availableFiles, availableResult, allFilesInQueue, pc
 
-vars == << fileSynchronizedQueue, foundFiles, availableFiles, allFilesInQueue, 
-           pc, file_, i, file >>
+(* define statement *)
+NumberOfResults == Len(resultsSynchronizedQueue) <= NF
+NumberOfFiles == Len(fileSynchronizedQueue) <= NF
+
+VARIABLES file_, result_, i, j, file, result
+
+vars == << fileSynchronizedQueue, resultsSynchronizedQueue, foundFiles, 
+           availableFiles, availableResult, allFilesInQueue, pc, file_, 
+           result_, i, j, file, result >>
 
 ProcSet == (0..0) \cup (1..NW)
 
 Init == (* Global variables *)
         /\ fileSynchronizedQueue = <<>>
+        /\ resultsSynchronizedQueue = <<>>
         /\ foundFiles = 0
         /\ availableFiles = 0
+        /\ availableResult = 0
         /\ allFilesInQueue = 0
         (* Process master *)
         /\ file_ = [self \in 0..0 |-> ""]
+        /\ result_ = [self \in 0..0 |-> ""]
         /\ i = [self \in 0..0 |-> 0]
+        /\ j = [self \in 0..0 |-> 0]
         (* Process worker *)
         /\ file = [self \in 1..NW |-> "none"]
+        /\ result = [self \in 1..NW |-> "none"]
         /\ pc = [self \in ProcSet |-> CASE self \in 0..0 -> "Search"
                                         [] self \in 1..NW -> "Read"]
 
@@ -88,9 +126,11 @@ Search(self) == /\ pc[self] = "Search"
                 /\ IF foundFiles < NF
                       THEN /\ pc' = [pc EXCEPT ![self] = "search"]
                       ELSE /\ pc' = [pc EXCEPT ![self] = "signalAllFilesInQueue"]
-                /\ UNCHANGED << fileSynchronizedQueue, foundFiles, 
-                                availableFiles, allFilesInQueue, file_, i, 
-                                file >>
+                /\ UNCHANGED << fileSynchronizedQueue, 
+                                resultsSynchronizedQueue, foundFiles, 
+                                availableFiles, availableResult, 
+                                allFilesInQueue, file_, result_, i, j, file, 
+                                result >>
 
 search(self) == /\ pc[self] = "search"
                 /\ file_' = [file_ EXCEPT ![self] = "file"]
@@ -98,27 +138,70 @@ search(self) == /\ pc[self] = "search"
                 /\ availableFiles' = availableFiles + 1
                 /\ foundFiles' = foundFiles + 1
                 /\ pc' = [pc EXCEPT ![self] = "Search"]
-                /\ UNCHANGED << allFilesInQueue, i, file >>
+                /\ UNCHANGED << resultsSynchronizedQueue, availableResult, 
+                                allFilesInQueue, result_, i, j, file, result >>
 
 signalAllFilesInQueue(self) == /\ pc[self] = "signalAllFilesInQueue"
                                /\ IF i[self] < NW
                                      THEN /\ allFilesInQueue' = allFilesInQueue + 1
                                           /\ i' = [i EXCEPT ![self] = i[self] + 1]
                                           /\ pc' = [pc EXCEPT ![self] = "signalAllFilesInQueue"]
-                                     ELSE /\ pc' = [pc EXCEPT ![self] = "Done"]
+                                     ELSE /\ pc' = [pc EXCEPT ![self] = "cumputeResults"]
                                           /\ UNCHANGED << allFilesInQueue, i >>
                                /\ UNCHANGED << fileSynchronizedQueue, 
+                                               resultsSynchronizedQueue, 
                                                foundFiles, availableFiles, 
-                                               file_, file >>
+                                               availableResult, file_, result_, 
+                                               j, file, result >>
+
+cumputeResults(self) == /\ pc[self] = "cumputeResults"
+                        /\ IF j[self] < NF
+                              THEN /\ pc' = [pc EXCEPT ![self] = "waitResult"]
+                              ELSE /\ pc' = [pc EXCEPT ![self] = "Done"]
+                        /\ UNCHANGED << fileSynchronizedQueue, 
+                                        resultsSynchronizedQueue, foundFiles, 
+                                        availableFiles, availableResult, 
+                                        allFilesInQueue, file_, result_, i, j, 
+                                        file, result >>
+
+waitResult(self) == /\ pc[self] = "waitResult"
+                    /\ availableResult > 0
+                    /\ availableResult' = availableResult - 1
+                    /\ pc' = [pc EXCEPT ![self] = "getResult"]
+                    /\ UNCHANGED << fileSynchronizedQueue, 
+                                    resultsSynchronizedQueue, foundFiles, 
+                                    availableFiles, allFilesInQueue, file_, 
+                                    result_, i, j, file, result >>
+
+getResult(self) == /\ pc[self] = "getResult"
+                   /\ result_' = [result_ EXCEPT ![self] = Head(resultsSynchronizedQueue)]
+                   /\ resultsSynchronizedQueue' = Tail(resultsSynchronizedQueue)
+                   /\ pc' = [pc EXCEPT ![self] = "exposeResult"]
+                   /\ UNCHANGED << fileSynchronizedQueue, foundFiles, 
+                                   availableFiles, availableResult, 
+                                   allFilesInQueue, file_, i, j, file, result >>
+
+exposeResult(self) == /\ pc[self] = "exposeResult"
+                      /\ PrintT(result_[self])
+                      /\ j' = [j EXCEPT ![self] = j[self] + 1]
+                      /\ pc' = [pc EXCEPT ![self] = "cumputeResults"]
+                      /\ UNCHANGED << fileSynchronizedQueue, 
+                                      resultsSynchronizedQueue, foundFiles, 
+                                      availableFiles, availableResult, 
+                                      allFilesInQueue, file_, result_, i, file, 
+                                      result >>
 
 master(self) == Search(self) \/ search(self) \/ signalAllFilesInQueue(self)
+                   \/ cumputeResults(self) \/ waitResult(self)
+                   \/ getResult(self) \/ exposeResult(self)
 
 Read(self) == /\ pc[self] = "Read"
               /\ allFilesInQueue > 0
               /\ allFilesInQueue' = allFilesInQueue - 1
               /\ pc' = [pc EXCEPT ![self] = "take"]
-              /\ UNCHANGED << fileSynchronizedQueue, foundFiles, 
-                              availableFiles, file_, i, file >>
+              /\ UNCHANGED << fileSynchronizedQueue, resultsSynchronizedQueue, 
+                              foundFiles, availableFiles, availableResult, 
+                              file_, result_, i, j, file, result >>
 
 take(self) == /\ pc[self] = "take"
               /\ IF fileSynchronizedQueue /= <<>>
@@ -130,15 +213,26 @@ take(self) == /\ pc[self] = "take"
                     ELSE /\ pc' = [pc EXCEPT ![self] = "Done"]
                          /\ UNCHANGED << fileSynchronizedQueue, availableFiles, 
                                          file >>
-              /\ UNCHANGED << foundFiles, allFilesInQueue, file_, i >>
+              /\ UNCHANGED << resultsSynchronizedQueue, foundFiles, 
+                              availableResult, allFilesInQueue, file_, result_, 
+                              i, j, result >>
 
 count(self) == /\ pc[self] = "count"
-               /\ PrintT(file[self])
-               /\ pc' = [pc EXCEPT ![self] = "take"]
-               /\ UNCHANGED << fileSynchronizedQueue, foundFiles, 
-                               availableFiles, allFilesInQueue, file_, i, file >>
+               /\ result' = [result EXCEPT ![self] = "result"]
+               /\ pc' = [pc EXCEPT ![self] = "putResult"]
+               /\ UNCHANGED << fileSynchronizedQueue, resultsSynchronizedQueue, 
+                               foundFiles, availableFiles, availableResult, 
+                               allFilesInQueue, file_, result_, i, j, file >>
 
-worker(self) == Read(self) \/ take(self) \/ count(self)
+putResult(self) == /\ pc[self] = "putResult"
+                   /\ resultsSynchronizedQueue' = Append(resultsSynchronizedQueue, result[self])
+                   /\ availableResult' = availableResult + 1
+                   /\ pc' = [pc EXCEPT ![self] = "take"]
+                   /\ UNCHANGED << fileSynchronizedQueue, foundFiles, 
+                                   availableFiles, allFilesInQueue, file_, 
+                                   result_, i, j, file, result >>
+
+worker(self) == Read(self) \/ take(self) \/ count(self) \/ putResult(self)
 
 (* Allow infinite stuttering to prevent deadlock on termination. *)
 Terminating == /\ \A self \in ProcSet: pc[self] = "Done"
@@ -158,5 +252,5 @@ Termination == <>(\A self \in ProcSet: pc[self] = "Done")
 
 =============================================================================
 \* Modification History
-\* Last modified Sat Apr 08 11:42:22 CEST 2023 by filip
+\* Last modified Tue Apr 11 09:58:45 CEST 2023 by filip
 \* Created Mon Apr 03 15:43:08 CEST 2023 by filip
